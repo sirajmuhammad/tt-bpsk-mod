@@ -3,7 +3,7 @@ project:
   title:        "BPSK Baseband Modulator"      # Project title
   author:       "Siraj Muhammad"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "Transmit-only BPSK baseband modulator (work in progress; currently the unmodified template passthrough design)"      # One line description of what your project does
+  description:  "Transmit-only BPSK baseband modulator: PRBS-7 source, +/-1 symbol mapper and polyphase RRC pulse shaper on an 8-bit signed sample bus"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     10000000       # Clock frequency in Hz (or 0 if not applicable)
 

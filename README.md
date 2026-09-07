@@ -12,10 +12,9 @@ PRBS-7  ->  +/-1 BPSK mapper  ->  polyphase RRC pulse shaper  ->  8-bit signed s
 The chip does **baseband only**. Demodulation (matched filter, timing recovery, slicer,
 BER counting), RF upconversion, and capture all live off-chip.
 
-> **Status:** `src/project.v` is currently the unmodified Tiny Tapeout template
-> passthrough. The metadata, pin map and datasheet describe the target design; the
-> modem RTL is in progress. The hardening path (LibreLane, precheck, gate-level test)
-> is green on the passthrough baseline.
+> **Status:** RTL complete. The shaped sample bus is bit-exact against the golden
+> model in `test/bpsk_model.py` under RTL simulation, across PRBS-7 and external-data
+> sources.
 
 ## How it works
 

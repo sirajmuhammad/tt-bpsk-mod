@@ -40,17 +40,13 @@ PRBS bit is echoed on `uio[2]` so a host can align for BER measurement. `clk_div
 The chip does baseband only. Demodulation, RF upconversion, and BER counting all live
 off-chip.
 
-**Status:** the RTL in `src/project.v` is currently the unmodified Tiny Tapeout template
-passthrough. This datasheet describes the target design; the pin map above is the
-intended final mapping.
-
 ## How to test
 
 Drive `clk` and release `rst_n`, then set `tx_enable` (`ui[0]`) high with `data_sel`
 (`ui[1]`) low to select the internal PRBS-7 source. Shaped samples appear on `uo[7:0]`,
 one per `sample_valid` (`uio[0]`) pulse, as 8-bit signed two's complement values.
 
-Capture the sample bus on each `sample_valid` and compare against the Python/numpy
+Capture the sample bus on each `sample_valid` and compare against the Python
 reference model, which generates the RRC taps, the PRBS-7 sequence, and the expected
 shaped output. Verification is a bit-exact match against that model, run under cocotb
 (`cd test && make`) at both RTL and gate level.
