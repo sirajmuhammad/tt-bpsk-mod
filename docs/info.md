@@ -46,6 +46,11 @@ Drive `clk` and release `rst_n`, then set `tx_enable` (`ui[0]`) high with `data_
 (`ui[1]`) low to select the internal PRBS-7 source. Shaped samples appear on `uo[7:0]`,
 one per `sample_valid` (`uio[0]`) pulse, as 8-bit signed two's complement values.
 
+Discard the first 16 samples (4 symbols) after each time `tx_enable` goes high. The
+shaper holds a 5-deep shift register of symbol signs, which is not cleared when
+`tx_enable` is deasserted, so those first samples still contain symbols from before
+the enable. From the fifth symbol onward the register holds only new data.
+
 Capture the sample bus on each `sample_valid` and compare against the Python
 reference model, which generates the RRC taps, the PRBS-7 sequence, and the expected
 shaped output. Verification is a bit-exact match against that model, run under cocotb
