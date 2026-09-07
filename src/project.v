@@ -54,31 +54,34 @@ module bpsk_shaper (
     output wire signed [7:0] sample
 );
 
-  function signed [9:0] pick;
-    input                sign;
-    input signed [9:0]   coeff;
+  function signed [7:0] pick;
+    input               sign;
+    input signed [7:0]  coeff;
     begin
       pick = sign ? coeff : -coeff;
     end
   endfunction
 
-  reg signed [9:0] acc;
+  // Every branch sums to at most 126 in magnitude, so each partial sum is in
+  // range too and 8-bit arithmetic is exact end to end. A wider accumulator
+  // would buy nothing: the output is 8 bits either way, and the bound is
+  // enforced by the golden model rather than by register width.
+  reg signed [7:0] acc;
 
   always @* begin
     case (phase)
-      2'd0: acc = pick(sr[0],  10'sd5) + pick(sr[1], -10'sd7) + pick(sr[2],  10'sd93)
-                + pick(sr[3], -10'sd7) + pick(sr[4],  10'sd5);
-      2'd1: acc = pick(sr[0], -10'sd2) + pick(sr[1],  10'sd18) + pick(sr[2],  10'sd81)
-                + pick(sr[3], -10'sd16);
-      2'd2: acc = pick(sr[0], -10'sd11) + pick(sr[1], 10'sd52) + pick(sr[2],  10'sd52)
-                + pick(sr[3], -10'sd11);
-      2'd3: acc = pick(sr[0], -10'sd16) + pick(sr[1], 10'sd81) + pick(sr[2],  10'sd18)
-                + pick(sr[3], -10'sd2);
+      2'd0: acc = pick(sr[0],  8'sd5) + pick(sr[1], -8'sd7) + pick(sr[2],  8'sd93)
+                + pick(sr[3], -8'sd7) + pick(sr[4],  8'sd5);
+      2'd1: acc = pick(sr[0], -8'sd2) + pick(sr[1],  8'sd18) + pick(sr[2],  8'sd81)
+                + pick(sr[3], -8'sd16);
+      2'd2: acc = pick(sr[0], -8'sd11) + pick(sr[1], 8'sd52) + pick(sr[2],  8'sd52)
+                + pick(sr[3], -8'sd11);
+      2'd3: acc = pick(sr[0], -8'sd16) + pick(sr[1], 8'sd81) + pick(sr[2],  8'sd18)
+                + pick(sr[3], -8'sd2);
     endcase
   end
 
-  // |acc| <= 126 by construction, so the low 8 bits are the exact value.
-  assign sample = acc[7:0];
+  assign sample = acc;
 
 endmodule
 
