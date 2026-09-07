@@ -37,8 +37,8 @@ endmodule
  *
  * At 4 samples per symbol the mapper emits impulses with zeros between them,
  * so only the taps congruent to the output phase see a nonzero input. Each
- * output sample is therefore a sum over one branch of a 17-tap filter rather
- * than the whole filter: 5 terms at phase 0, 4 at the others.
+ * output sample is therefore a sum over one branch of a 25-tap filter rather
+ * than the whole filter: 7 terms at phase 0, 6 at the others.
  *
  * Symbols are +/-1, so every tap is a sign-selected add and no multiplier is
  * needed. sr[j] is the sign of symbol[m-j]: 1 selects +coefficient, 0 selects
@@ -49,7 +49,7 @@ endmodule
  * there is no saturation logic here and none is needed.
  */
 module bpsk_shaper (
-    input  wire       [4:0] sr,
+    input  wire       [6:0] sr,
     input  wire       [1:0] phase,
     output wire signed [7:0] sample
 );
@@ -70,14 +70,15 @@ module bpsk_shaper (
 
   always @* begin
     case (phase)
-      2'd0: acc = pick(sr[0],  8'sd5) + pick(sr[1], -8'sd7) + pick(sr[2],  8'sd93)
-                + pick(sr[3], -8'sd7) + pick(sr[4],  8'sd5);
-      2'd1: acc = pick(sr[0], -8'sd2) + pick(sr[1],  8'sd18) + pick(sr[2],  8'sd81)
-                + pick(sr[3], -8'sd16);
-      2'd2: acc = pick(sr[0], -8'sd11) + pick(sr[1], 8'sd52) + pick(sr[2],  8'sd52)
-                + pick(sr[3], -8'sd11);
-      2'd3: acc = pick(sr[0], -8'sd16) + pick(sr[1], 8'sd81) + pick(sr[2],  8'sd18)
-                + pick(sr[3], -8'sd2);
+      2'd0: acc = pick(sr[0], -8'sd2) + pick(sr[1],  8'sd5) + pick(sr[2], -8'sd7)
+                + pick(sr[3],  8'sd91) + pick(sr[4], -8'sd7) + pick(sr[5],  8'sd5)
+                + pick(sr[6], -8'sd2);
+      2'd1: acc = pick(sr[0], -8'sd1) + pick(sr[1], -8'sd2) + pick(sr[2],  8'sd17)
+                + pick(sr[3],  8'sd79) + pick(sr[4], -8'sd16) + pick(sr[5],  8'sd5);
+      2'd2: acc = pick(sr[0],  8'sd2) + pick(sr[1], -8'sd11) + pick(sr[2],  8'sd50)
+                + pick(sr[3],  8'sd50) + pick(sr[4], -8'sd11) + pick(sr[5],  8'sd2);
+      2'd3: acc = pick(sr[0],  8'sd5) + pick(sr[1], -8'sd16) + pick(sr[2],  8'sd79)
+                + pick(sr[3],  8'sd17) + pick(sr[4], -8'sd2) + pick(sr[5], -8'sd1);
     endcase
   end
 
@@ -110,7 +111,7 @@ module tt_um_sirajmuhammad_bpsk_mod (
   wire        sample_en = tx_enable && (div_cnt == div_max);
 
   reg  [1:0] phase;      // phase of the sample being produced
-  reg  [4:0] sr;         // symbol signs, sr[0] newest
+  reg  [6:0] sr;         // symbol signs, sr[0] newest
   wire       symbol_en = sample_en && (phase == 2'd0);
 
   // Symbol source. The PRBS runs whenever a symbol is consumed so that the bit
@@ -129,7 +130,7 @@ module tt_um_sirajmuhammad_bpsk_mod (
 
   // The new symbol must take part in its own phase-0 sample, so the shaper is
   // fed the post-shift value rather than the registered one.
-  wire [4:0] sr_next = (phase == 2'd0) ? {sr[3:0], sym_bit} : sr;
+  wire [6:0] sr_next = (phase == 2'd0) ? {sr[5:0], sym_bit} : sr;
 
   wire signed [7:0] shaped;
   bpsk_shaper u_shaper (
@@ -147,7 +148,7 @@ module tt_um_sirajmuhammad_bpsk_mod (
     if (!rst_n) begin
       div_cnt  <= 16'd0;
       phase    <= 2'd0;
-      sr       <= 5'd0;
+      sr       <= 7'd0;
       sample_q <= 8'sd0;
       valid_q  <= 1'b0;
       tick_q   <= 1'b0;

@@ -26,13 +26,14 @@ aligned to a known starting state.
 internal PRBS and an external bit on `ext_data`.
 
 **RRC pulse shaper** — root-raised-cosine, implemented **polyphase** rather than as a
-literal 17-tap FIR. The mapper emits impulses at 4x with zeros between them, so only about
-5 taps see a nonzero input at any output phase. The design keeps a 5-deep shift register of
+literal 25-tap FIR. The mapper emits impulses at 4x with zeros between them, so only about
+7 taps see a nonzero input at any output phase. The design keeps a 7-deep shift register of
 symbol signs and selects one of 4 coefficient sets by phase, making each output sample a
-5-term add/subtract. Because BPSK symbols are `+/-1`, every tap is a sign-selected add and
+6- or 7-term add/subtract. Because BPSK symbols are `+/-1`, every tap is a sign-selected add and
 **no multipliers are needed** — roughly a quarter the hardware of the naive version.
 
-Coefficients are scaled so the worst case (all five signs aligned) sums to `<= 127`.
+Coefficients are scaled so the worst case (all signs in the fullest branch aligned) sums
+to `<= 127`.
 Overflow is impossible by construction, so **there is no saturation logic** — which removes
 the most likely source of disagreement between the RTL and the reference model.
 
@@ -41,8 +42,8 @@ the most likely source of disagreement between the RTL and the reference model.
 | Parameter | Value |
 |---|---|
 | Samples per symbol | 4 |
-| RRC span | 4 symbols |
-| RRC taps | 17 |
+| RRC span | 6 symbols |
+| RRC taps | 25 |
 | RRC rolloff (beta) | 0.35 |
 | Coefficient width | 8-bit signed |
 | PRBS | PRBS-7, `x^7 + x^6 + 1`, seed `7'h7F` |

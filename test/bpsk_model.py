@@ -7,16 +7,16 @@ same integers with no intermediate file format.
 Standard library only, and integer arithmetic once the taps are quantized,
 which is what makes the bit-exact comparison meaningful.
 
-Parameters: 4 samples/symbol, 4-symbol span, 17 taps, rolloff 0.35, 8-bit
+Parameters: 4 samples/symbol, 6-symbol span, 25 taps, rolloff 0.35, 8-bit
 signed coefficients, PRBS-7 x^7+x^6+1 seed 0x7F.
 """
 
 import math
 
 SPS = 4          # samples per symbol
-SPAN = 4         # filter span in symbols
+SPAN = 6         # filter span in symbols
 BETA = 0.35      # RRC rolloff
-NTAPS = SPAN * SPS + 1   # 17
+NTAPS = SPAN * SPS + 1   # 25
 COEFF_MAX = 127  # worst-case phase sum must fit in 8-bit signed
 
 PRBS_SEED = 0x7F
@@ -89,7 +89,7 @@ def polyphase_banks(taps=None, sps=SPS):
     """Taps split by output phase: banks[p][j] multiplies symbol[m-j].
 
     Output sample n has phase p = n % sps and draws on taps k == p (mod sps),
-    so only ~5 of the 17 taps contribute to any one sample. This is the
+    so only ~7 of the 25 taps contribute to any one sample. This is the
     decomposition the RTL implements.
     """
     if taps is None:
@@ -98,7 +98,7 @@ def polyphase_banks(taps=None, sps=SPS):
 
 
 BANKS = polyphase_banks()
-BANK_DEPTH = max(len(b) for b in BANKS)   # symbol shift register depth (5)
+BANK_DEPTH = max(len(b) for b in BANKS)   # symbol shift register depth (7)
 
 
 # --------------------------------------------------------------------------
